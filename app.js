@@ -1,17 +1,21 @@
 // require libraries
 const User    = require('./data/base/database.js');
+const os      = require('os');
 const cluster = require('cluster');
 
 // coe to run if we're in a master process
 if (cluster.isMaster) {
 
-    // Count the machine's CPUs
-    var cpuCount = require('os').cpus().length;
-
     // Create a worker for each CPU
-    for (var i = 0; i < cpuCount; i += 1) {
-        cluster.fork();
+    for (var i = 0; i < os.cpus().length; i ++) {
+        var worker = cluster.fork();
+        console.log("started working with pid%d", worker.process.pid);
     }
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log('Worker died', worker.id);
+        worker;
+    })
 
 // Code to run if we're in a worker process
 } else {
@@ -23,7 +27,7 @@ if (cluster.isMaster) {
     var app = express();
 
     // Add a basic route – index page
-    app.get('/', function (req, res) {
+    app.get('/', (req, res) => {
         res.send('Hello from worker' + cluster.worker.id);
     });
 
