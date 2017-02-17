@@ -1,11 +1,15 @@
+// Require library
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-node');
 
+
+// Create Schema
 var userSchema = new mongoose.Schema({
     username:{type: String, unique: true},
     password:String
 });
 
+// Encryption
 userSchema.pre('save', function(next){
     var user = this;
     if(user.isModified('password')){
@@ -18,8 +22,9 @@ userSchema.pre('save', function(next){
         });
     }
     next();
-})
+});
 
+// Compare encryption
 userSchema.methods.comparePassword = function(attemptedPassword, callback) {
     bcrypt.compare(attemptedPassword, this.password, function(err, isMatch) {
         callback(isMatch);
@@ -28,7 +33,7 @@ userSchema.methods.comparePassword = function(attemptedPassword, callback) {
 var User = mongoose.model('users', userSchema);
 
 
-// connect mongoose
+// Connect to Mongodb
 mongoose.connect('mongodb://localhost/mongoose-bcrypt-test');
 
 var db = mongoose.connection;
@@ -51,4 +56,5 @@ testUser.save(function(err, data){
     else console.log ('Sucess:' , data);
 });
 
+//Export database
 module.exports = User;
